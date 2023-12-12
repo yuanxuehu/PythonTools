@@ -5,9 +5,9 @@ Python脚本工具
 FindSelectorsUnrefs.py
 #使用示例：
 
-'''
-$python3 FindSelectorsUnrefs.py -a /Users/XXX/Library/Developer/Xcode/DerivedData/XXX-fqnqqxsirmzjmpgprzgvcvykqgot/Build/Products/Debug-iphonesimulator/XXX.app -p /Users/XXX/Projects/XXX -w XXX
-'''
+```
+python3 FindSelectorsUnrefs.py -a /Users/XXX/Library/Developer/Xcode/DerivedData/XXX-fqnqqxsirmzjmpgprzgvcvykqgot/Build/Products/Debug-iphonesimulator/XXX.app -p /Users/XXX/Projects/XXX -w XXX
+```
 
 #运行成功后会在当前目录下生成 find_selector_unrefs.txt文件 里面是工程中未使用到的方法
 
@@ -34,9 +34,9 @@ $python3 FindSelectorsUnrefs.py -a /Users/XXX/Library/Developer/Xcode/DerivedDat
 FindClassUnRefs.py，依赖于FindAllClassIvars.py
 #使用示例：
 
-'''
-#python3 FindClassUnRefs.py -p /Users/XXX/Library/Developer/Xcode/DerivedData/XXX-fqnqqxsirmzjmpgprzgvcvykqgot/Build/Products/Debug-iphonesimulator/XXX.app -w XXX
-'''
+```
+python3 FindClassUnRefs.py -p /Users/XXX/Library/Developer/Xcode/DerivedData/XXX-fqnqqxsirmzjmpgprzgvcvykqgot/Build/Products/Debug-iphonesimulator/XXX.app -w XXX
+```
 
 #运行成功后会在当前目录下生成 find_class_unrefs.txt文件 里面是工程中未使用到的方法
 
