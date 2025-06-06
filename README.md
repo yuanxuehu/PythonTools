@@ -42,3 +42,12 @@ python3 FindClassUnRefs.py -p /Users/XXX/Library/Developer/Xcode/DerivedData/XXX
 
 参数使用同上
 
+## 三、批量压缩图片脚本
+使用前需替换Tinify API key 和输入输出路径
+#使用示例：
+
+```
+python3 TinifyImageCompress.py
+```
+
+
