@@ -42,6 +42,12 @@ python3 FindClassUnRefs.py -p /Users/XXX/Library/Developer/Xcode/DerivedData/XXX
 
 参数使用同上
 
+## 原理：
+## 利用Mach-O文件的结构：
+##  - Mach-O文件的`__DATA __objc_classrefs`段记录了引用类的地址。
+##  - `__DATA __objc_classlist`段记录了所有类的地址。
+##  - 取差集就可以得到未使用的类的地址，然后进行符号化。
+
 ## 三、批量压缩图片脚本
 使用前需替换Tinify API key 和输入输出路径，使用 pip 安装 Python 图像处理库 PIL（实际安装的是其维护分支 Pillow）pip install Pillow
 
