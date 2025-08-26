@@ -57,4 +57,13 @@ python3 FindClassUnRefs.py -p /Users/XXX/Library/Developer/Xcode/DerivedData/XXX
 python3 TinifyImageCompress.py
 ```
 
+## 四、iOS OC工程未使用类检测脚本
+完整分析（需Xcode生成Linkmap和Mach-O）：先用otool分析Mach-O获取类列表和引用列表；然后过滤特殊情况（父类、load方法类、动态调用类）；最后输出未使用类清单。对于无法获取Mach-O的情况，可以降级到代码扫描方案
+
+## 使用示例：
+
+```
+ python3 /Users/TigerHu/Downloads/PythonTools/CheckOCProjectUnusedClass.py --project_path /Users/TigerHu/XcodeProjects/YourCompanyName/YourProjectName/ --macho_path /Users/TigerHu/Library/Developer/Xcode/DerivedData/xxx-fofkvptgsedrxmcavcsqvgzpbjyi/Build/Products/Debug-iphoneos/YourApp.app/YourApp --linkmap_path /Users/TigerHu/Library/Developer/Xcode/DerivedData/xxx-fofkvptgsedrxmcavcsqvgzpbjyi/Build/Intermediates.noindex/xxx.build/Debug-iphoneos/YourApp.build/YourApp-LinkMap-normal-arm64.txt
+```
+
 
