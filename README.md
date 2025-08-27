@@ -66,4 +66,22 @@ python3 TinifyImageCompress.py
  python3 /Users/TigerHu/Downloads/PythonTools/CheckOCProjectUnusedClass.py --project_path /Users/TigerHu/XcodeProjects/YourCompanyName/YourProjectName/ --macho_path /Users/TigerHu/Library/Developer/Xcode/DerivedData/xxx-fofkvptgsedrxmcavcsqvgzpbjyi/Build/Products/Debug-iphoneos/YourApp.app/YourApp --linkmap_path /Users/TigerHu/Library/Developer/Xcode/DerivedData/xxx-fofkvptgsedrxmcavcsqvgzpbjyi/Build/Intermediates.noindex/xxx.build/Debug-iphoneos/YourApp.build/YourApp-LinkMap-normal-arm64.txt
 ```
 
+## 五、极简版 iOS 无用资源检测脚本
+"""
+极简版 iOS 无用资源检测脚本
+- 资源仅在 --images-root 指定的目录中扫描（默认支持 .png/.svga/.mp3/.mp4，可用 --res-exts 覆盖）
+- 代码仅扫描 .m 文件（可用 --code-exts 扩展，例如 .m,.mm）
+- 匹配规则：只要资源“基名”在任意代码文件中出现一次，即判定为已使用；命中后对该资源短路，后续不再继续匹配
+- 扫描过程中每约 1 秒输出一次扫描进度（已处理文件、百分比、剩余未命中数量、用时）
+- PNG 资源名自动归一化（去除 @2x/@3x/~iphone/~ipad 后缀），避免重复统计
+"""
+
+## 使用示例：
+
+```
+ python3 /Users/TigerHu/ios_unused_resources_detector.py /Users/TigerHu/XcodeProjects/YourCompanyName/YourProjectName \
+  --images-root /Users/TigerHu/XcodeProjects/YourCompanyName/YourProjectName/Resources \
+  --code-exts .m
+```
+
 
