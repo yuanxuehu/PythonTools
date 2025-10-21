@@ -2,6 +2,8 @@
 # Created by TigerHu on 2025/6/6.
 # Copyright © 2025 TigerHu. All rights reserved.
 
+# 背景：手动压缩一次性最多压缩20张图片且每日压缩次数受限，该脚本适用于批量压缩图片的需求场景
+
 import os
 import tinify
 from PIL import Image
@@ -9,9 +11,9 @@ from concurrent.futures import ThreadPoolExecutor
 import time
 
 # ===== 配置区域 =====
-API_KEYS = ["5Pt9XmvbYmd39NLT5BXfwmjxxxxx", "YMPWR5gLrNstTj9fVCPRB9fMTxxxx"]  # 替换为实际API Key
-INPUT_FOLDER = "/Users/xxx/Downloads/1111/OriginalImg"  # 输入图片目录
-OUTPUT_FOLDER = "/Users/xxx/Downloads/1111/NewImg"  # 输出图片目录
+API_KEYS = ["xxxxx", "xxxxx", "xxxxx"]  # 替换为实际API Key
+INPUT_FOLDER = "/Users/xxx/OriginalImg"  # 输入图片目录
+OUTPUT_FOLDER = "/Users/xxx/NewImg"  # 输出图片目录
 MAX_WORKERS = 5  # 最大并发线程数
 # ====================
 
