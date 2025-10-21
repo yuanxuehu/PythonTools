@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Created by TigerHu on 2025/8/27.
+# Created by TigerHu on 2025/10/21.
 # Copyright © 2025 TigerHu. All rights reserved.
 
 """
-Objective-C .m 文件引用检测（支持多路径忽略）
+示例:
+python3 /Users/yxh/objc_class_reference_checker.py /path/to/project -w KJ --ignore-paths "PATH1 PATH2 PATH3"
+"""
+
+"""
+Objective-C .m 文件引用检测（支持多路径忽略和智能引用分析）
 - 新增功能：通过 `--ignore-paths` 参数指定多个路径前缀（空格分隔）
 - 保留原有白名单（-w）功能，支持组合使用
+- 智能引用检测：只计算真正的外部引用，排除类名只在本类内出现的情况
+- 支持检测多种引用模式：指针类型、方法调用、属性声明、泛型等
 用法：
   python3 objc_class_reference_checker.py /path/to/project [-w PREFIX] [--ignore-paths "PATH1 PATH2"]
 """
@@ -56,6 +63,43 @@ def extract_class_names_from_file(path: Path) -> Set[str]:
             names.add(m.group(1))
     return names
 
+def extract_class_references_from_file(path: Path) -> Set[str]:
+    """从单个文件中提取类名引用集合（排除本类内定义）"""
+    try:
+        text = path.read_text(encoding='utf-8', errors='ignore')
+    except Exception:
+        try:
+            text = path.read_text(encoding='latin-1', errors='ignore')
+        except Exception:
+            return set()
+    
+    # 提取本文件中定义的类名
+    defined_classes = set()
+    for reg in CLASS_REGEXES:
+        for m in reg.finditer(text):
+            defined_classes.add(m.group(1))
+    
+    # 提取所有可能的类名引用（包括类型声明、方法参数、属性等）
+    reference_patterns = [
+        re.compile(r'\b([A-Za-z_][A-Za-z0-9_]*)\s*\*'),  # 指针类型声明
+        re.compile(r'\b([A-Za-z_][A-Za-z0-9_]*)\s+[a-z]'),  # 类型 + 变量名
+        re.compile(r'\[([A-Za-z_][A-Za-z0-9_]*)\s+'),  # 方法调用 [ClassName method]
+        re.compile(r'@property\s*\([^)]*\)\s*([A-Za-z_][A-Za-z0-9_]*)'),  # 属性类型
+        re.compile(r'typedef\s+[^;]*\s+([A-Za-z_][A-Za-z0-9_]*)'),  # typedef
+        re.compile(r'NSArray\s*<\s*([A-Za-z_][A-Za-z0-9_]*)\s*\*>'),  # 泛型
+        re.compile(r'NSDictionary\s*<\s*[^,]*,\s*([A-Za-z_][A-Za-z0-9_]*)\s*\*>'),  # 字典泛型
+    ]
+    
+    referenced_classes = set()
+    for pattern in reference_patterns:
+        for m in pattern.finditer(text):
+            class_name = m.group(1)
+            # 排除本类内定义的类名
+            if class_name not in defined_classes:
+                referenced_classes.add(class_name)
+    
+    return referenced_classes
+
 def filter_class_names(names: Set[str], prefix: Optional[str]) -> Set[str]:
     """根据白名单前缀筛选类名集合"""
     if not prefix:
@@ -98,20 +142,38 @@ def main() -> None:
         print('未找到任何 .m 文件')
         sys.exit(0)
 
-    # 2) 收集全局类名集合
+    # 2) 收集全局类名集合和引用关系
     all_class_names: Set[str] = set()
+    class_references: dict = {}  # 文件名 -> 引用的类名集合
+    
     for p in m_files:
+        # 收集所有定义的类名
         all_class_names.update(extract_class_names_from_file(p))
+        # 收集每个文件的类名引用（排除本类内定义）
+        class_references[p] = extract_class_references_from_file(p)
 
     # 3) 应用白名单筛选类名
     filtered_class_names = filter_class_names(all_class_names, args.whitelist)
     
-    # 4) 逐文件比对
+    # 4) 逐文件比对 - 检查文件名对应的类名是否被其他文件引用
     referenced: List[Path] = []
     unreferenced: List[Path] = []
+    
     for p in m_files:
         base = p.stem  # 文件名去扩展
-        if base in filtered_class_names:
+        if base not in filtered_class_names:
+            # 文件名不在类名集合中，直接标记为未引用
+            unreferenced.append(p)
+            continue
+            
+        # 检查这个类名是否被其他文件引用
+        is_referenced = False
+        for other_file, refs in class_references.items():
+            if other_file != p and base in refs:
+                is_referenced = True
+                break
+        
+        if is_referenced:
             referenced.append(p)
         else:
             unreferenced.append(p)
@@ -123,16 +185,17 @@ def main() -> None:
     print(f"总 .m 文件: {len(m_files)} {ignore_note}")
     print(f"原始类名总数: {len(all_class_names)}")
     print(f"筛选后类名总数{whitelist_note}: {len(filtered_class_names)}")
-    print(f"匹配文件数(被认为引用/有效): {len(referenced)}")
-    print(f"未匹配文件数(可疑未引用): {len(unreferenced)}")
+    print(f"被其他文件引用的类文件数: {len(referenced)}")
+    print(f"未被其他文件引用的类文件数: {len(unreferenced)}")
 
-    print("\n=========== 可疑未引用的 .m 文件（文件名未匹配类名） ==========")
+    print("\n=========== 未被其他文件引用的 .m 文件（类名只在本类内出现） ==========")
     for i, p in enumerate(sorted(unreferenced), 1):
         print(f"{i:3d}. {p}")
 
-    print("\n=========== 匹配成功的 .m 文件（文件名匹配类名） ==========")
+    print("\n=========== 被其他文件引用的 .m 文件（类名被外部引用） ==========")
     for i, p in enumerate(sorted(referenced), 1):
         print(f"{i:3d}. {p}")
 
 if __name__ == '__main__':
     main()
+  
