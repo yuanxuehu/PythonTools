@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Created by TigerHu on 2025/8/27.
+# Created by TigerHu on 2025/10/21.
 # Copyright © 2025 TigerHu. All rights reserved.
+
+"""
+示例：
+python3 /Users/yxh/ios_unused_resources_detector.py /MainProject --images-root /MainResource --code-exts .m
+"""
 
 """
 极简版 iOS 无用资源检测脚本
